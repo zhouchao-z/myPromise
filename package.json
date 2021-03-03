@@ -1,0 +1,23 @@
+{
+  "name": "mypromise",
+  "version": "1.0.0",
+  "description": "Parody",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./index.js -i ./data/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhouchao-z/myPromise.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zhouchao-z/myPromise/issues"
+  },
+  "homepage": "https://github.com/zhouchao-z/myPromise#readme",
+  "dependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
