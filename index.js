@@ -6,7 +6,6 @@ let promise = new MyPromise((resolve, reject) => {
   throw new Error('exception: Error')
 })
 
-
 promise.then(value => {
   console.log('success ' + value);
 }, reason => {
