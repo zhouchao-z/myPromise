@@ -3,9 +3,11 @@ const MyPromise = (function () {
   FULFILLED = 'FULFILLED',
   REJECTED = 'REJECTED';
 
+  const onfulfilledCallbacks = [];
+  const onrejectedCallbacks = [];
+
   class MyPromise {
     constructor(executor) {
-
       this.status = PENDING;
       this.value = undefined;
       this.reason = undefined;
@@ -14,6 +16,10 @@ const MyPromise = (function () {
         if(this.status === PENDING) {
           this.status = FULFILLED;
           this.vlaue = value;
+          // 对fulfilled进行集中发布
+          onfulfilledCallbacks.forEach(ful => {
+            ful();
+          })
         }
       }
 
@@ -21,6 +27,11 @@ const MyPromise = (function () {
         if(this.status === PENDING) {
           this.status = REJECTED;
           this.reason = reason;
+
+          // 对rejected进行集中发布
+          onrejectedCallbacks.forEach(rej => {
+            rej();
+          })
         }
       }
       try {
@@ -32,10 +43,20 @@ const MyPromise = (function () {
     
     then(onFulfilled, onRejected) {
       if(this.status === FULFILLED) {
-        onFulfilled(this.vlaue)
+        onFulfilled(this.vlaue);
       }
       if(this.status === REJECTED) {
-        onRejected(this.reason)
+        onRejected(this.reason);
+      }
+      
+      // 异步的情况，收集依赖
+      if(this.status === PENDING) {
+        onfulfilledCallbacks.push(() => {
+          onFulfilled(this.vlaue);
+        })
+        onrejectedCallbacks.push(() => {
+          onRejected(this.reason);
+        })
       }
     }
   }
