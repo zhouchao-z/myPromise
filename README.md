@@ -54,3 +54,73 @@ onrejectedCallbacks.forEach(rej => {
 })
 ```
 
+#### 3. chain
+
+处理then的链式调用情况：
+>  一个then必须要返回一个Promise
+既然要进行链式调用，就必须要知道不断的链式调用过程中，分别是什么样的情况会走进onfulfilled或onrejected 
+要通过当前then函数的返回值，来确定**之后**的then函数是调用onfulfilled还是onrejected。
+所以之后的工作，全部放到研究返回值上， 对应到代码上就是resolvePromise这个函数
+
+成功的条件(调用then后，返回一个成功状态的Promise，已供下次then使用)：
+- 返回一个合法的JavaScript值，(包含undefeind, null)
+- 返回一个带有成功状态的Promise 
+
+> 这里使用的是原生promise，方便做测试
+```js
+let promise = new Promise((resolve, reject) => {
+  resolve(2);
+})
+promise.then(value => {
+  // 返回一个带有成功状态的Promise, 所以接下来的then函数中会调用onfulfilled
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(value);
+    }, 0)
+  })
+}, reason => {
+  console.log('reject1 ' + reason)
+}).then((value) => {
+  console.log('promsie: ' + value); //promsie: 2
+  return value; // 返回一个合法的JavaScript值， 所以接下来的then函数中会调用onfulfilled
+}, (reason) => {
+  console.log('reject2 ' + reason);
+}).then((value) => {
+  console.log('javascript: ' + value); //javascript: 2
+})
+```
+
+失败的条件(调用then后，返回一个失败状态的Promise，已供下次then使用)：
+- then函数中抛出异常
+- 返回一个带有失败状态的Promise
+
+```js
+let promise = new Promise((resolve, reject) => {
+  resolve(2);
+})
+promise.then(value => {
+  // 返回一个带有失败状态的Promise， 所以接下来的then函数中会调用onrejected
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(value);
+    }, 0)
+  })
+}, reason => {
+  console.log('reject1 ' + reason)
+}).then((value) => {
+  console.log('promsie: ' + value); 
+}, (reason) => {
+  console.log('reject2: ' + reason); // reject2: 2
+  throw new Error('Exception: ' + reason); // 抛出异常，所以接下来的then函数中会调用onrejected
+}).then((value) => {
+  console.log('javascript: ' + value); 
+}, (reason) => {
+  console.log('抛出异常：' + reason); // 抛出异常：Error: Exception: 2
+})
+```
+
+
+
+最后是关于Promise相关静态方法的实现，由于比较简单，看代码即可！
+
+
